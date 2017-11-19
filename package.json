@@ -1,0 +1,29 @@
+{
+  "name": "dmxcontrol",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juliankern/node-dmxcontrol.git"
+  },
+  "keywords": [
+    "dmx",
+    "control"
+  ],
+  "author": "Julian Kern <mail@juliankern.com> (https://juliankern.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/juliankern/node-dmxcontrol/issues"
+  },
+  "homepage": "https://github.com/juliankern/node-dmxcontrol#readme",
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "blessed-contrib": "^4.8.5",
+    "dmx": "0.0.5",
+    "terminal-kit": "^1.14.3"
+  }
+}
