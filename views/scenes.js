@@ -76,7 +76,7 @@ module.exports = ({ universe, screen }) => {
         table = grid.set(2, 0, viewHeight - 1, 3, blessed.table, {
             style: {
                 border: {
-                    fg: 'cyan'
+                    fg: 'white'
                 },
                 cell: {
                     fg: 'white'

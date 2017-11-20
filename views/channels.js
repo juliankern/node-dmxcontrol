@@ -1,4 +1,4 @@
-const contrib = require('blessed-contrib')
+const blessed = require('blessed')
 
 
 module.exports = ({ universe, screen }) => {
@@ -46,30 +46,58 @@ module.exports = ({ universe, screen }) => {
         hide();
         let ch = 0;
         tables = [];
-        for(let i = 0; i < 12 && ch < universe.length; i++) {
-            let table = grid.set(2, i, viewHeight - 1, 1, contrib.table, {
-                fg: 'white',
-                selectedFg: 'white',
-                selectedBg: 'blue',
+        for(let i = 0; ch < universe.length; i++) {
+            let table = blessed.listtable({
+                top: 3,
+                left: i * 12,
+                width: 11,
+                height: viewHeight - 3,
+                border: {
+                    type: 'line'
+                },
+                style: {
+                    selected: {
+                        fg: 'white',
+                        bg: 'red'
+                    },
+                    item: {
+                        fg: 'white',
+                        bg: 'red'
+                    },
+                    border: {
+                        fg: 'white'
+                    },
+                    cell: {
+                        fg: 'white',
+                        padding: {
+                            top: 0,
+                            bottom: 0
+                        }
+                    },
+                    header: {
+                        fg: 'white',
+                        bold: true,
+                        padding: 0
+                    }
+                },
+                noCellBorders: true,
+                pad: 0
                 // border: {type: "line", fg: "cyan"},
-                columnSpacing: 5, //in chars,
-                columnWidth: [4, 6] /*in chars*/
             });
+            table.down(3);
 
             let rows = [];
-            while (rows.length < viewHeight - 5 && ch < universe.length) {
+            while (rows.length < viewHeight - 4 && ch < universe.length) {
                 rows.push([ ('' + (ch + 1)).padStart(4), ' ' + (universe[ch].toFixed(0).padStart(3, ' ')) ]);
 
                 ch++;
             }
 
-            table.setData({
-                headers: ['Ch', ' Value'],
-                data: rows
-            });
+            table.setData([
+                ['Ch', ' Value']
+            ].concat(rows));
 
-            table.rows.select(false);
-
+            screen.append(table);
             tables.push(table);
         }
 

@@ -24,7 +24,6 @@
     "blessed": "^0.1.81",
     "blessed-contrib": "^4.8.5",
     "dmx": "0.0.5",
-    "load-directory": "^2.0.20",
-    "terminal-kit": "^1.14.3"
+    "load-directory": "^2.0.20"
   }
 }
