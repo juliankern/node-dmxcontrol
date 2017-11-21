@@ -1,10 +1,9 @@
 const blessed = require('blessed')
+const storage = global.dmxcon.storage;
 
-let scenes = [
-    { id: 1, name: 'test', fade: 0, channels: { 1: 255, 10: 255, 20: 255 } },
-];
+let scenes = storage.get('scnenes:sceneList') || [];
 
-module.exports = ({ universe, screen }) => {
+module.exports = ({ screen }) => {
     let table;
 
     return {
@@ -14,16 +13,28 @@ module.exports = ({ universe, screen }) => {
                 test(command) { return ['save'].includes(command.toLowerCase()) },
                 callback(command) {
                     let args = command.split(' ');
-                    let scene = { id: 1, name: '', fade: 0, channels: {} };
+                    scenes.sort((a, b) => a.id - b.id);
+                    let nextId = scenes.slice(-1).pop() ? scenes.slice(-1).pop().id + 1 : 1;
+                    let scene = { id: nextId, name: '', fade: 0, channels: {} };
+
                     args.shift();
-                    args.forEach((a) => {
-                        let keyValue = a.split(':');
-                        scene[keyValue[0]] = keyValue[1];
+                    args.forEach((a, i) => {
+                        if (!a.includes(':')) {
+                            scene.name = a;
+                        } else {
+                            let keyValue = a.split(':');
+                            scene[keyValue[0]] = keyValue[1];
+                        }
                     });
 
-                    scene.channels = universe.filter(ch => ch > 0);
+                    global.dmxcon.universedata.forEach((v, ch) => {
+                        if (v > 0) {
+                            scene.channels[ch + 1] = v;
+                        }
+                    })
 
                     scenes.push(scene);
+                    storage.set('scnenes:sceneList', scenes);
 
                     this.setStatus(`Saved current set of channels as scene "${scene.name}" (ID: ${scene.id})`);
                 }
@@ -91,15 +102,19 @@ module.exports = ({ universe, screen }) => {
             // border: {type: "line", fg: "cyan"},
         });
 
-        let rows = [];
-        scenes.sort((a, b) => a.id - b.id);
-        scenes.forEach((scene) => {
-            rows.push([ '' + scene.id, scene.name, '' + scene.fade, '' + Object.keys(scene.channels).length ]);
-        });
+        if (scenes.length > 0) {
+            let rows = [];
+            scenes.sort((a, b) => a.id - b.id);
+            scenes.forEach((scene) => {
+                rows.push([ '' + scene.id, scene.name, '' + scene.fade, '' + Object.keys(scene.channels).length ]);
+            });
+            table.setData([
+                ['ID', 'Name', 'Fade', 'Channels']
+            ].concat(rows));
+        } else {
+            table.setData([ ['No scenes saved yet.'] ]);
+        }
 
-        table.setData([
-            ['ID', 'Name', 'Fade', 'Channels']
-        ].concat(rows));
 
         screen.render();
     }

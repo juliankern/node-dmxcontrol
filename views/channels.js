@@ -1,7 +1,6 @@
 const blessed = require('blessed')
 
-
-module.exports = ({ universe, screen }) => {
+module.exports = ({ screen }) => {
     let tables = [];
 
     return {
@@ -46,7 +45,7 @@ module.exports = ({ universe, screen }) => {
         hide();
         let ch = 0;
         tables = [];
-        for(let i = 0; ch < universe.length; i++) {
+        for(let i = 0; ch < global.dmxcon.universedata.length; i++) {
             let table = blessed.listtable({
                 top: 3,
                 left: i * 12,
@@ -87,8 +86,8 @@ module.exports = ({ universe, screen }) => {
             table.down(3);
 
             let rows = [];
-            while (rows.length < viewHeight - 4 && ch < universe.length) {
-                rows.push([ ('' + (ch + 1)).padStart(4), ' ' + (universe[ch].toFixed(0).padStart(3, ' ')) ]);
+            while (rows.length < viewHeight - 4 && ch < global.dmxcon.universedata.length) {
+                rows.push([ ('' + (ch + 1)).padStart(4), ' ' + (global.dmxcon.universedata[ch].toFixed(0).padStart(3, ' ')) ]);
 
                 ch++;
             }

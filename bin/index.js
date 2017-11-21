@@ -1,26 +1,15 @@
+require('../lib/global');
 console.log('Terminal size: ' + process.stdout.columns + 'x' + process.stdout.rows);
 
-const DMX = require('dmx');
-var dmx = new DMX();
-dmx.addUniverse('dmx', 'enttec-usb-dmx-pro', '/dev/cu.usbserial-EN223883');
-let universe = dmx.universes['dmx'].universe;
-
 const blessed = require('blessed');
-const contrib = require('blessed-contrib')
+const contrib = require('blessed-contrib');
+
+const screen = blessed.screen({ autoPadding: false, dockBorders: true });
+const grid = new contrib.grid({ rows: process.stdout.rows, cols: 12, screen: screen });
+const viewHeight = process.stdout.rows - 4;
 
 const settings = require('../lib/settings');
-
-const screen = blessed.screen({
-    autoPadding: false,
-    dockBorders: true
-});
-const grid = new contrib.grid({ rows: process.stdout.rows, cols: 12, screen: screen });
-
-let currentView = 0;
-let statusTimeout;
-
-const views = require('../views')({ universe, screen });
-const viewHeight = process.stdout.rows - 4;
+const views = require('../views')({ screen });
 
 let navigationItems = {};
 views.forEach((view) => {
@@ -31,12 +20,12 @@ const navigation = grid.set(0, 0, 3, 12, blessed.listbar, Object.assign(settings
 const status = grid.set(viewHeight + 2, 0, 3, 12, blessed.text, settings.status);
 const input = grid.set(viewHeight, 0, 3, 12, blessed.textbox, settings.input);
 
-navigation.select(0);
-navigation.on('click', () => {
-    renderView();
-});
+let currentView = 0;
+let statusTimeout;
 
+navigation.select(0);
 input.focus();
+renderView();
 
 input.key(['escape', 'C-c'], (ch, key) => {
     return process.exit(0);
@@ -65,8 +54,6 @@ input.on('submit', (content) => {
     renderView();
 });
 
-renderView();
-
 function renderView() {
     let screenNumber = currentView + 1;
 
@@ -93,24 +80,28 @@ function getCurrentView() {
 
 class ViewHelper {
     static resetUniverse() {
-        universe = universe.fill(0);
+        global.dmxcon.universedata = global.dmxcon.universedata.fill(0);
         this.setStatus(`Reset all channels to 0`);
     }
 
     static setChannel(ch, value) {
+        let channels = {};
+
         if (value < 0) value = 0;
         if (value > 255) value = 255;
 
         ch.split(',').forEach((c) => {
             if (c < 0 || c > 512) return;
-            universe[c - 1] = +value;
-        })
+            channels[c - 1] = +value;
+        });
+
+        global.dmxcon.universe.update(channels);
 
         this.setStatus(`Set channel ${ch} to ${value}`);
     }
 
     static send_universe() {
-        dmx.universes['dmx'].send_universe.bind(dmx.universes['dmx']);
+        global.dmxcon.dmx.universes['dmx'].send_universe.bind(global.dmxcon.dmx.universes['dmx']);
     }
 
     static setStatus(str) {
